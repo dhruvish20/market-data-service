@@ -1,5 +1,8 @@
 from app.core.database import Base, engine
-from app.models import price_point  # ensures model is registered
+from app.models import price_point  
+from app.models import raw_market_data 
+from app.models import symbol_average
+from app.models import polling_job 
 
 def init_db():
     print("Creating database tables")
