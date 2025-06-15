@@ -20,15 +20,29 @@ config = {
 consumer = Consumer(config)
 consumer.subscribe([KAFKA_TOPIC])
 
-def process_message(msg_value: dict , db: Session):
+def process_message(msg_value: dict, db: Session):
     symbol = msg_value['symbol']
     price = float(msg_value['price'])
     timestamp = datetime.fromisoformat(msg_value['timestamp'])
     provider = msg_value['source']
 
-    previous = (db.query(PricePoint).filter(PricePoint.symbol == symbol).
-                order_by(PricePoint.timestamp.desc()).limit(4).all())
-    
+    price_point = PricePoint(
+        symbol=symbol,
+        price=price,
+        timestamp=timestamp,
+        provider=provider
+    )
+    db.add(price_point)
+    print(f"Saved to PricePoint: {symbol} at {timestamp}")
+
+    previous = (
+        db.query(PricePoint)
+        .filter(PricePoint.symbol == symbol)
+        .order_by(PricePoint.timestamp.desc())
+        .limit(4)
+        .all()
+    )
+
     prices = [price] + [p.price for p in previous]
     moving_average = sum(prices) / len(prices)
 
@@ -38,10 +52,11 @@ def process_message(msg_value: dict , db: Session):
         moving_average=moving_average,
         provider=provider
     )
-    
     db.merge(average_record)
+
     db.commit()
     print(f"Processed {symbol} at {timestamp} with moving average {moving_average}")
+
 
 def consume():
     db = SessionLocal()

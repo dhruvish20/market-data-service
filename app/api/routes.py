@@ -27,7 +27,7 @@ async def get_prices(symbol: str, provider: str = None, db: Session = Depends(ge
         query = query.filter(PricePoint.provider == provider)
     
     result = query.order_by(PricePoint.timestamp.desc()).first()
-    if result:
+    if not result:
         raise HTTPException(status_code=404, detail="Price point not found")
     
     return result 
@@ -93,8 +93,8 @@ async def create_polling_job(
 @router.get("/test-db")
 async def test_db_connection(db: Session = Depends(get_db)):
     try:
-        # Run a lightweight query
         db.execute(text("SELECT 1"))
         return {"status": "connected"}
     except Exception as e:
         return {"status": "error", "details": str(e)}
+
