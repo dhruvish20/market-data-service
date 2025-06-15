@@ -17,6 +17,8 @@ services:
       - DB_NAME=marketdata
       - DB_USER=postgres
       - DB_PASSWORD=postgres
+    env_file:
+      - .env  
     volumes:
       - .:/app
     command: >
@@ -55,6 +57,11 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+    
+  redis:
+    image: redis:7
+    container_name: marketdata-redis
+    restart: always
 
 volumes:
   postgres_data:

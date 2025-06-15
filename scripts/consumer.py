@@ -7,6 +7,8 @@ from app.models.price_point import PricePoint
 import json
 from datetime import datetime
 import uuid
+from app.core.redis import set_cache
+
 
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "price-events")
@@ -56,6 +58,16 @@ def process_message(msg_value: dict, db: Session):
 
     db.commit()
     print(f"Processed {symbol} at {timestamp} with moving average {moving_average}")
+
+    cache_key = f"latest_price_{symbol}_{provider}"
+    cache_value = json.dumps({
+        "symbol": symbol,
+        "price": price,
+        "timestamp": timestamp.isoformat(),
+        "provider": provider,
+    })
+    set_cache(cache_key, cache_value)
+    print(f"Cached latest price for {symbol} from {provider}")
 
 
 def consume():

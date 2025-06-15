@@ -10,6 +10,7 @@ from uuid import uuid4
 from app.services.providers.yfinance_provider import YFinanceProvider
 from app.models.raw_market_data import RawMarketData
 from app.services.kafka_producer import produce_price_event
+from app.core.redis import get_cache, set_cache
 import json
 from datetime import datetime
 
@@ -22,6 +23,13 @@ router = APIRouter()
 
 @router.get("/latest")
 async def get_prices(symbol: str, provider: str = None, db: Session = Depends(get_db)):
+    key = f"latest_price_{symbol}_{provider}"
+    cached_price = get_cache(key)
+
+    if cached_price:
+        print(f"Cache hit for {key}")
+        return json.loads(cached_price)
+    
     query = db.query(PricePoint).filter(PricePoint.symbol == symbol)
     if provider:
         query = query.filter(PricePoint.provider == provider)
@@ -30,7 +38,16 @@ async def get_prices(symbol: str, provider: str = None, db: Session = Depends(ge
     if not result:
         raise HTTPException(status_code=404, detail="Price point not found")
     
-    return result 
+    result_dict = {
+        "symbol": result.symbol,
+        "price": result.price,
+        "timestamp": result.timestamp.isoformat(),
+        "provider": result.provider
+    }
+
+    set_cache(key, json.dumps(result_dict))
+    print(f"Cached latest price for {symbol} at key: {key}")
+    return result_dict
 
 @router.post("/poll", response_model=PollingJobResponse)
 async def create_polling_job(
