@@ -4,7 +4,7 @@ from app.core.database import Base
 
 
 class PricePoint(Base):
-    __tablename__ = "price_points"  # ✅ This line is mandatory
+    __tablename__ = "price_points"  
 
     id = Column(Integer, primary_key=True, index=True)
     symbol = Column(String, index=True)
