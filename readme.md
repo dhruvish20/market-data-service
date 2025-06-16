@@ -121,7 +121,7 @@ Schedule a polling job:
 
 Query latest price (uses Redis cache if available):
 
-```http
+```
 /prices/latest?symbol=AAPL&provider=yfinance
 ```
 
