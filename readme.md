@@ -209,7 +209,7 @@ sudo docker-compose exec app bash -c "PYTHONPATH=/app python scripts/consumer.py
 
 ---
 
-## 📈 Future Improvements
+## Future Improvements
 
 * Add `/prices/average` endpoint to expose moving averages
 * Add test suite using Pytest
@@ -218,6 +218,6 @@ sudo docker-compose exec app bash -c "PYTHONPATH=/app python scripts/consumer.py
 
 ---
 
-## 📞 Contact
+## Contact
 
 Built by Dhruvish Parekh — Open to feedback and collaboration!
